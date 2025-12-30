@@ -33,7 +33,7 @@ In my `.ioc`:
 
 ## Step 2 - Add a mode-change request flag
 * Add the following in the global "Private Variables section":
-  ```
+  ```c
   volatile uint8_t  mode_change_requested = 0;
   ```
 
@@ -41,7 +41,7 @@ In my `.ioc`:
 * **This is not where mode is changed!**
 * CubeMX already generated the EXTI handler
 * Add this callback:
-  ```
+  ```c
   void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
   {
       if (GPIO_Pin == B1_Pin)
@@ -54,7 +54,7 @@ In my `.ioc`:
 
 ## Step 4 - Apply the mode change in main loop
 * Modify `while(1)`:
-  ```
+  ```c
   while (1)
   {
       if (mode_change_requested)
@@ -88,7 +88,7 @@ We want...
 ### Button debounce state
 * Remove all references to `mode_change_requested`
 * Add the following in the global "Private Variables section":
-  ```
+  ```c
   typedef struct
   {
       uint8_t  pending;
@@ -99,7 +99,7 @@ We want...
   ```
 ### Update the EXTI callback
 * Replace the existing EXTI callback with...
-  ```
+  ```c
   void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
   {
       if (GPIO_Pin == B1_Pin)
@@ -116,7 +116,7 @@ We want...
 
 ### Debounce handler (main loop)
 * Add this function:
-  ```
+  ```c
   #define DEBOUNCE_MS 50
   
   uint8_t button_debounce_update(void)
@@ -139,7 +139,7 @@ We want...
 
 ### Integrate into main loop
 Modify `while(1)`:
-```
+```c
 while (1)
 {
     if (button_debounce_update())
@@ -154,8 +154,6 @@ while (1)
     led_update(&led, system_tick_ms);
 }
 ```
-
-
 
 ## Expected behavior
 * Each button press cycles:
