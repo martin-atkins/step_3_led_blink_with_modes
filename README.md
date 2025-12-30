@@ -136,7 +136,27 @@ We want...
       return 0;
   }
   ```
-  
+
+### Integrate into main loop
+Modify `while(1)`:
+```
+while (1)
+{
+    if (button_debounce_update())
+    {
+        led.mode++;
+        if (led.mode > LED_MODE_FAST)
+        {
+            led.mode = LED_MODE_OFF;
+        }
+    }
+
+    led_update(&led, system_tick_ms);
+}
+```
+
+
+
 ## Expected behavior
 * Each button press cycles:
   ```
