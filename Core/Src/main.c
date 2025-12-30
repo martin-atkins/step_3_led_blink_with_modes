@@ -57,7 +57,8 @@ typedef struct
 TIM_HandleTypeDef htim2;
 
 /* USER CODE BEGIN PV */
-volatile uint32_t system_tick_ms = 0;
+volatile uint8_t  mode_change_requested = 0;
+volatile uint32_t system_tick_ms        = 0;
 
 /* USER CODE END PV */
 
@@ -126,7 +127,18 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-	  led_update(&led, system_tick_ms);
+	if (mode_change_requested)
+	{
+		mode_change_requested = 0;
+
+		led.mode++;
+		if (led.mode > LED_MODE_FAST)
+		{
+			led.mode = LED_MODE_OFF;
+		}
+	}
+
+	led_update(&led, system_tick_ms);
 
   }
   /* USER CODE END 3 */
@@ -265,12 +277,24 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(LD2_GPIO_Port, &GPIO_InitStruct);
 
+  /* EXTI interrupt init*/
+  HAL_NVIC_SetPriority(EXTI15_10_IRQn, 0, 0);
+  HAL_NVIC_EnableIRQ(EXTI15_10_IRQn);
+
   /* USER CODE BEGIN MX_GPIO_Init_2 */
 
   /* USER CODE END MX_GPIO_Init_2 */
 }
 
 /* USER CODE BEGIN 4 */
+void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
+{
+    if (GPIO_Pin == B1_Pin)
+    {
+        mode_change_requested = 1;
+    }
+}
+
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
     if (htim->Instance == TIM2)
